@@ -1,0 +1,29 @@
+# Visual Studio cache files
+.vs/
+
+# Build output
+bin/
+obj/
+
+# Azure Functions publish output
+.publish/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Local function settings
+local.settings.json
+
+# Rider
+.idea/
+
+# NuGet
+*.nupkg
+.nuget/
+
+# OS files
+.DS_Store
+Thumbs.db
