@@ -43,6 +43,7 @@ public sealed class CosmosAnalyticsRepository : ICosmosAnalyticsRepository
         public Guid OrderId { get; init; }
         public string Status { get; init; } = string.Empty;
         public string Email { get; init; } = string.Empty;
+        public string SiteId { get; init; } = string.Empty;
         public AnalyticsOrderAddress? Address { get; init; }
         public IEnumerable<AnalyticsOrderItem> Items { get; init; } = Array.Empty<AnalyticsOrderItem>();
         public IEnumerable<string> Tags { get; init; } = Array.Empty<string>();
@@ -53,6 +54,7 @@ public sealed class CosmosAnalyticsRepository : ICosmosAnalyticsRepository
             OrderId = request.OrderId;
             Status = request.Status;
             Email = request.Email;
+            SiteId = request.SiteId;
             Address = request.Address;
             Items = request.Items;
             Tags = request.Tags;
