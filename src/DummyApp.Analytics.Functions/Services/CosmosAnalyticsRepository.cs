@@ -36,6 +36,41 @@ public sealed class CosmosAnalyticsRepository : ICosmosAnalyticsRepository
         await _container.UpsertItemAsync(document, new PartitionKey(document.OrderId.ToString()), cancellationToken: cancellationToken);
     }
 
+    public async Task<IEnumerable<AnalyticsEventResponse>> GetAnalyticsAsync(int periodDays, CancellationToken cancellationToken)
+    {
+        if (periodDays <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(periodDays), "periodDays must be greater than zero.");
+        }
+
+        var startDate = DateTimeOffset.UtcNow.AddDays(-periodDays);
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.EventTimestamp >= @startDate")
+            .WithParameter("@startDate", startDate);
+
+        var iterator = _container.GetItemQueryIterator<AnalyticsEventDocument>(query);
+        var results = new List<AnalyticsEventResponse>();
+
+        while (iterator.HasMoreResults)
+        {
+            var response = await iterator.ReadNextAsync(cancellationToken);
+            foreach (var document in response)
+            {
+                results.Add(new AnalyticsEventResponse(
+                    document.Id,
+                    document.OrderId,
+                    document.Status,
+                    document.Email,
+                    document.SiteId,
+                    document.Address,
+                    document.Items,
+                    document.Tags,
+                    document.EventTimestamp));
+            }
+        }
+
+        return results;
+    }
+
     private sealed class AnalyticsEventDocument
     {
         [JsonProperty("id")]
@@ -48,6 +83,11 @@ public sealed class CosmosAnalyticsRepository : ICosmosAnalyticsRepository
         public IEnumerable<AnalyticsOrderItem> Items { get; init; } = Array.Empty<AnalyticsOrderItem>();
         public IEnumerable<string> Tags { get; init; } = Array.Empty<string>();
         public DateTimeOffset EventTimestamp { get; init; }
+
+        // Required for Cosmos DB JSON deserialization.
+        public AnalyticsEventDocument()
+        {
+        }
 
         public AnalyticsEventDocument(AnalyticsEventRequest request)
         {
